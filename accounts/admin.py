@@ -1,6 +1,24 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
+from django.contrib.auth.forms import UserChangeForm as DjangoUserChangeForm
+from django.contrib.auth.models import User
 
 from .models import Interest, Profile
+
+
+class UserChangeForm(DjangoUserChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'password' in self.fields:
+            self.fields['password'].help_text = ''
+
+
+class UserAdmin(DjangoUserAdmin):
+    form = UserChangeForm
+
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 
 
 @admin.register(Interest)
