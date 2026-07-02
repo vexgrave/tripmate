@@ -1,6 +1,8 @@
 import random
 from datetime import date, time, timedelta
+from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -8,7 +10,7 @@ from django.db import transaction
 from accounts.models import Interest, Profile
 from applications.models import Application
 from reviews.models import Review
-from trips.models import Trip
+from trips.models import Trip, TripPhoto
 
 User = get_user_model()
 
@@ -85,6 +87,60 @@ TRIPS = [
          description='Уже прошедший поход — используется для демонстрации отзывов и рейтинга.'),
 ]
 
+# Фото уже лежат в media/trips и media/trip_photos (см. trips/management/commands/fetch_trip_photos.py).
+# Подключаем их по имени файла, чтобы не тянуть Wikimedia Commons заново при каждом деплое.
+TRIP_PHOTOS = {
+    'Поход на Эльбрус (базовый лагерь)': (
+        'Mount_Elbrus_snow_peak_xFjYDHA.jpg',
+        ['Caucasus_mountains_hiking_trail_3K1fR0f.jpg', 'mountaineering_camp_tent_snow_z0Fe3fI.jpg'],
+    ),
+    'Выходные в Суздале': (
+        'Suzdal_Russia_church_golden_domes_q9KPHV3.jpg',
+        ['Suzdal_kremlin_wooden_architecture_NAEsyl8.jpg', 'Golden_Ring_Russia_town_K5L8XDF.jpg'],
+    ),
+    'Фестиваль электронной музыки': (
+        'music_festival_crowd_night_stage_lights_LQIE8YM.jpg',
+        ['concert_stage_lights_crowd_20vyM48.jpg', 'DJ_festival_crowd_party_egC4lDD.jpg'],
+    ),
+    'Экскурсия по Третьяковской галерее': (
+        'Tretyakov_Gallery_entrance_sign.jpg',
+        ['art_museum_interior_painting_hall_H2IsRWN.jpg', 'museum_gallery_hall_paintings_QqvbdRB.jpg'],
+    ),
+    'Поход выходного дня в Карелию': (
+        'Karelia_lake_forest_landscape_9k5lbeP.jpg',
+        ['Karelia_nature_rocks_lake_p0BkaPx.jpg', 'forest_lake_Russia_reflection_tHPuXZS.jpg'],
+    ),
+    'Гастротур по Санкт-Петербургу': (
+        'Saint_Petersburg_street_cafe_VulXiJe.jpg',
+        ['street_food_market_stall_EaHif1m.jpg', 'restaurant_table_food_dishes_z9TlONw.jpg'],
+    ),
+    'Джип-тур по Кавказу': (
+        'off-road_jeep_mountains_dirt_road_9Efe851.jpg',
+        ['Caucasus_mountains_road_landscape_lW17x8N.jpg'],
+    ),
+    'Прошедший поход в Хибины': (
+        'Khibiny_mountains.jpg',
+        ['arctic_tundra_mountains_landscape_K2OiF28.jpg', 'mountain_hiking_snow_ridge_5eWoaIM.jpg'],
+    ),
+    'Автопутешествие Казань — Москва': ('highway_road_landscape.jpg', []),
+    'Фотопрогулка по вечерней Москве': (
+        'Moscow_night_city_lights_architecture_eCvzdGl.jpg',
+        ['Moscow_Kremlin_night_illuminated_uU4stb0.jpg', 'city_street_night_lights_long_exposure_anUqyTs.jpg'],
+    ),
+    'Велопрогулка вдоль набережной': (
+        'cycling_path_riverside_promenade_NFMbXjG.jpg',
+        ['bicycle_path_park_trees_ygVCC3I.jpg'],
+    ),
+    'Кемпинг на берегу озера': (
+        'camping_tent_lake_shore_PA73E8d.jpg',
+        ['campfire_lake_evening.jpg', 'tent_lake_forest.jpg'],
+    ),
+    'Волонтёрская уборка леса': (
+        'forest_cleanup_volunteers_trash_bags_cyyUgeN.jpg',
+        ['volunteers_nature_trail_cleanup_L91AFoX.jpg', 'forest_trail_path_green_7PJ4Wqw.jpg'],
+    ),
+}
+
 
 class Command(BaseCommand):
     help = 'Наполняет базу тестовыми данными: интересы, пользователи, поездки, заявки, отзывы.'
@@ -149,9 +205,31 @@ class Command(BaseCommand):
             )
             if created:
                 trip.interests.set([interests[name] for name in data['interests']])
+            self._attach_photos(trip)
             result.append(trip)
         self.stdout.write(f'Поездки: {len(result)}')
         return result
+
+    def _attach_photos(self, trip):
+        """Подключает уже закоммиченные в media/ демо-фото к поездке по имени файла."""
+        photos = TRIP_PHOTOS.get(trip.title)
+        if not photos:
+            return
+        cover_name, gallery_names = photos
+
+        if not trip.image:
+            cover_path = Path(settings.MEDIA_ROOT) / 'trips' / cover_name
+            if cover_path.exists():
+                trip.image.name = f'trips/{cover_name}'
+                trip.save(update_fields=['image'])
+
+        if trip.photos.count() == 0:
+            for name in gallery_names:
+                photo_path = Path(settings.MEDIA_ROOT) / 'trip_photos' / name
+                if photo_path.exists():
+                    photo = TripPhoto(trip=trip)
+                    photo.image.name = f'trip_photos/{name}'
+                    photo.save()
 
     def _create_applications(self, users, trips):
         usernames = list(users.keys())

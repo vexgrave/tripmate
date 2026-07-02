@@ -27,5 +27,6 @@ urlpatterns = [
     path('', include('core.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Медиафайлы (аватары, фото поездок) отдаются самим Django и в проде тоже —
+# проект не использует отдельное файловое хранилище (S3 и т.п.).
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

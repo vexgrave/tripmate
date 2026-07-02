@@ -2,7 +2,16 @@ venv/
 __pycache__/
 *.pyc
 db.sqlite3
-media/
+
+# Пользовательские загрузки (аватары и т.п.) не версионируем, но демо-фото
+# поездок из seed_data/fetch_trip_photos держим в репозитории — иначе на
+# бесплатном хостинге с эфемерным диском они пропадают при каждом деплое.
+media/*
+!media/trips/
+!media/trips/**
+!media/trip_photos/
+!media/trip_photos/**
+
 staticfiles/
 .env
 *.log
