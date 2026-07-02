@@ -20,14 +20,87 @@ Python, Django 6, django-allauth (email + VK OAuth), SQLite, Bootstrap 5, Django
 ## Структура проекта
 
 ```
-tripmate_project/   настройки и корневой urls.py
-core/                главная страница, общие шаблоны, management-команда seed_data
-accounts/            Profile, Interest, регистрация/профиль/личный кабинет, Telegram/MAX вход
-trips/               модель Trip, каталог, CRUD поездок
-applications/        заявки на участие
-reviews/             отзывы и рейтинг
-recommendations/     гибридная система рекомендаций (recommendations/engine.py)
-templates/           Bootstrap-шаблоны всех приложений
+tripmate/
+├── accounts/
+│   ├── migrations/
+│   ├── adapters.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── signals.py
+│   ├── urls.py
+│   └── views.py
+├── applications/
+│   ├── migrations/
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── core/
+│   ├── management/
+│   │   └── commands/
+│   │       └── seed_data.py
+│   ├── migrations/
+│   ├── admin.py
+│   ├── apps.py
+│   ├── context_processors.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── recommendations/
+│   ├── migrations/
+│   ├── admin.py
+│   ├── apps.py
+│   ├── engine.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── reviews/
+│   ├── migrations/
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── trips/
+│   ├── management/
+│   │   └── commands/
+│   │       └── fetch_trip_photos.py
+│   ├── migrations/
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── static/
+│   └── css/
+│       └── style.css
+├── templates/
+│   ├── account/
+│   ├── accounts/
+│   ├── applications/
+│   ├── core/
+│   ├── recommendations/
+│   ├── reviews/
+│   ├── trips/
+│   └── base.html
+├── tripmate_project/
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── .env.example
+├── .gitignore
+├── build.sh
+├── manage.py
+├── README.md
+├── render.yaml
+└── requirements.txt
 ```
 
 ## Запуск проекта локально
@@ -96,7 +169,7 @@ python manage.py runserver
 
 ## Система рекомендаций
 
-`recommendations/engine.py` — гибридная скоринговая система (без ML/нейросетей). Для каждой активной поездки
+`recommendations/engine.py` — гибридная скоринговая система на явных правилах. Для каждой активной поездки
 считается `recommendation_score` как взвешенная сумма шести показателей:
 
 ```
