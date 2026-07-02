@@ -3,9 +3,9 @@ URL configuration for tripmate_project project.
 """
 from allauth.account import views as allauth_views
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve as serve_static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,4 +29,8 @@ urlpatterns = [
 
 # Медиафайлы (аватары, фото поездок) отдаются самим Django и в проде тоже —
 # проект не использует отдельное файловое хранилище (S3 и т.п.).
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# django.conf.urls.static.static() тут не подходит: она молча ничего не
+# добавляет при DEBUG=False, поэтому маршрут прописан напрямую.
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve_static, {'document_root': settings.MEDIA_ROOT}),
+]
