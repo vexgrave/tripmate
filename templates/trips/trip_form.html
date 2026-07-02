@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}{% if is_create %}Создать поездку{% else %}Редактировать поездку{% endif %} — TripMate{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="mb-4">{% if is_create %}Создать поездку{% else %}Редактировать поездку{% endif %}</h1>
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label">{{ form.title.label }}</label>
+                    {{ form.title }}
+                    {% for error in form.title.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">{{ form.description.label }}</label>
+                    {{ form.description }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">{{ form.image.label }} <span class="text-muted small">(главное фото — обложка карточки)</span></label>
+                    {{ form.image }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Фото направления <span class="text-muted small">(необязательно, можно выбрать несколько)</span></label>
+                    <input type="file" name="photos" multiple accept="image/*" class="form-control">
+                    {% if gallery %}
+                        <div class="row row-cols-3 row-cols-md-4 g-2 mt-1">
+                            {% for photo in gallery %}
+                                <div class="col position-relative">
+                                    <img src="{{ photo.image.url }}" class="img-fluid rounded-2 gallery-thumb" alt="Фото поездки">
+                                    <form method="post" action="{% url 'trips:trip_photo_delete' pk=trip.pk photo_pk=photo.pk %}" class="position-absolute top-0 end-0 m-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-light border py-0 px-1" title="Удалить фото">&times;</button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.departure_city.label }}</label>
+                    {{ form.departure_city }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.destination.label }}</label>
+                    {{ form.destination }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.date.label }}</label>
+                    {{ form.date }}
+                    {% for error in form.date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.time.label }}</label>
+                    {{ form.time }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">{{ form.budget.label }}</label>
+                    {{ form.budget }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.max_participants.label }}</label>
+                    {{ form.max_participants }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.category.label }}</label>
+                    {{ form.category }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.transport.label }}</label>
+                    {{ form.transport }}
+                </div>
+                {% if form.status %}
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.status.label }}</label>
+                    {{ form.status }}
+                </div>
+                {% endif %}
+                <div class="col-12">
+                    <label class="form-label">{{ form.requirements.label }}</label>
+                    {{ form.requirements }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">{{ form.interests.label }}</label>
+                    <div class="row row-cols-2 row-cols-md-3">
+                        {% for checkbox in form.interests %}
+                            <div class="form-check col">{{ checkbox.tag }} <label class="form-check-label">{{ checkbox.choice_label }}</label></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">{% if is_create %}Создать поездку{% else %}Сохранить изменения{% endif %}</button>
+            {% if not is_create %}
+                <a href="{% url 'trips:trip_detail' pk=trip.pk %}" class="btn btn-outline-secondary mt-4">Отмена</a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

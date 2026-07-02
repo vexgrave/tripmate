@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.username }} — TripMate{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body text-center">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" class="avatar-lg mb-3">
+                {% else %}
+                    <i class="bi bi-person-circle text-secondary mb-3" style="font-size:6rem;"></i>
+                {% endif %}
+                <h4>{{ profile_user.username }}</h4>
+                <p class="text-muted mb-1">
+                    {% if profile.city %}<i class="bi bi-geo-alt"></i> {{ profile.city }}{% endif %}
+                    {% if profile.age %} · {{ profile.age }} лет{% endif %}
+                </p>
+                <p class="mb-2"><i class="bi bi-star-fill text-warning"></i> Рейтинг: <strong>{{ profile.rating }}</strong>/5</p>
+
+                {% if profile.bio %}<p class="text-start">{{ profile.bio }}</p>{% endif %}
+
+                {% if profile.interests.all %}
+                    <div class="mb-3">
+                        {% for interest in profile.interests.all %}
+                            <span class="badge text-bg-light border me-1">{{ interest.name }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="social-links mb-3">
+                    {% if profile.telegram_url %}<a href="{{ profile.telegram_url }}" target="_blank" rel="noopener"><i class="bi bi-telegram fs-4"></i></a>{% endif %}
+                    {% if profile.vk_url %}<a href="{{ profile.vk_url }}" target="_blank" rel="noopener"><i class="bi bi-person-video2 fs-4"></i></a>{% endif %}
+                    {% if profile.instagram_url %}<a href="{{ profile.instagram_url }}" target="_blank" rel="noopener"><i class="bi bi-instagram fs-4"></i></a>{% endif %}
+                    {% if profile.youtube_url %}<a href="{{ profile.youtube_url }}" target="_blank" rel="noopener"><i class="bi bi-youtube fs-4"></i></a>{% endif %}
+                    {% if profile.other_url %}<a href="{{ profile.other_url }}" target="_blank" rel="noopener"><i class="bi bi-link-45deg fs-4"></i></a>{% endif %}
+                </div>
+
+                {% if user == profile_user %}
+                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary w-100">Редактировать профиль</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <h5 class="mb-3">Поездки, созданные пользователем</h5>
+        <div class="row g-3 mb-4">
+            {% for trip in trips %}
+                {% include 'trips/trip_card.html' %}
+            {% empty %}
+                <p class="text-muted">Пока нет созданных поездок.</p>
+            {% endfor %}
+        </div>
+
+        <h5 class="mb-3">Отзывы</h5>
+        {% for review in reviews %}
+            <div class="border rounded-3 p-2 mb-2">
+                <div class="d-flex justify-content-between">
+                    <strong>{{ review.author.username }}</strong>
+                    <span class="text-warning">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+                </div>
+                <p class="mb-1 text-muted small">по поездке «{{ review.trip.title }}»</p>
+                <p class="mb-0">{{ review.comment }}</p>
+            </div>
+        {% empty %}
+            <p class="text-muted">Отзывов пока нет.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

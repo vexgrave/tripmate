@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Оставить отзыв — TripMate{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <h1 class="mb-3">Отзыв о {{ target_user.username }}</h1>
+        <p class="text-muted">По итогам поездки «{{ trip.title }}»</p>
+        <form method="post">
+            {% csrf_token %}
+            <label class="form-label">{{ form.rating.label }}</label>
+            {{ form.rating }}
+            <label class="form-label mt-3">{{ form.comment.label }}</label>
+            {{ form.comment }}
+            <button type="submit" class="btn btn-primary mt-3">Оставить отзыв</button>
+            <a href="{% url 'trips:trip_detail' pk=trip.pk %}" class="btn btn-outline-secondary mt-3">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

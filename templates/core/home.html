@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}TripMate — найди попутчиков для поездки{% endblock %}
+{% block content %}
+<section class="hero">
+    <p class="hero-eyebrow mb-0">TripMate — компания в дорогу</p>
+    <hr class="hero-rule">
+    <h1 class="display-5 mb-3 col-lg-9">Найди попутчиков и компанию для своей поездки</h1>
+    <p class="col-lg-7 fs-5 text-muted mb-4">Прогулки, походы, поездки на выходные, мероприятия и экскурсии — создавай поездку или присоединяйся к чужой.</p>
+    <a href="{% url 'trips:trip_list' %}" class="btn btn-brand me-2">Смотреть поездки</a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'trips:trip_create' %}" class="btn btn-outline-brand">Создать поездку</a>
+    {% else %}
+        <a href="{% url 'register' %}" class="btn btn-outline-brand">Зарегистрироваться</a>
+    {% endif %}
+</section>
+
+{% if user.is_authenticated and recommendations %}
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Рекомендованные поездки для вас</h3>
+        <a href="{% url 'recommendations:recommendations_list' %}" class="small">Все рекомендации →</a>
+    </div>
+    <div class="row g-3">
+        {% for rec in recommendations %}
+            {% include 'trips/trip_card.html' with trip=rec.trip %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section>
+    <h3 class="mb-3">Новые поездки</h3>
+    <div class="row g-3">
+        {% for trip in latest_trips %}
+            {% include 'trips/trip_card.html' %}
+        {% empty %}
+            <p class="text-muted">Пока нет активных поездок. Будьте первым, кто создаст поездку!</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

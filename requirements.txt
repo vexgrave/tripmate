@@ -1,0 +1,6 @@
+Django==6.0.6
+django-allauth==65.18.0
+django-widget-tweaks==1.5.1
+Pillow==12.3.0
+python-decouple==3.8
+requests==2.34.2

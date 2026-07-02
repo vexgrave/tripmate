@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load widget_tweaks socialaccount %}
+{% block title %}Вход — TripMate{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-4 text-center">Вход в TripMate</h1>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        {{ form.login|add_class:"form-control" }}
+                        {% for error in form.login.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Пароль</label>
+                        {{ form.password|add_class:"form-control" }}
+                        {% for error in form.password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% if form.remember %}
+                    <div class="form-check mb-3">
+                        {{ form.remember|add_class:"form-check-input" }}
+                        <label class="form-check-label">Запомнить меня</label>
+                    </div>
+                    {% endif %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    <button type="submit" class="btn btn-primary w-100">Войти</button>
+                </form>
+
+                <div class="text-center my-3 text-muted">или</div>
+
+                <div class="d-grid gap-2">
+                    <a href="{% provider_login_url 'vk' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-video2"></i> Войти через VK
+                    </a>
+                    <a href="#" id="telegram-login-trigger" class="btn btn-outline-info">
+                        <i class="bi bi-telegram"></i> Войти через Telegram
+                    </a>
+                    <a href="{% url 'accounts:max_login_stub' %}" class="btn btn-outline-secondary">
+                        Войти через MAX
+                    </a>
+                </div>
+
+                {% if TELEGRAM_BOT_USERNAME %}
+                <div class="text-center mt-2" id="telegram-widget-holder" style="display:none;">
+                    <script async src="https://telegram.org/js/telegram-widget.js?22"
+                            data-telegram-login="{{ TELEGRAM_BOT_USERNAME }}"
+                            data-size="large"
+                            data-auth-url="{{ request.scheme }}://{{ request.get_host }}{% url 'accounts:telegram_login' %}"
+                            data-request-access="write"></script>
+                </div>
+                {% endif %}
+
+                <p class="text-center mt-4 mb-0">Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    // Без сложного JS: просто показываем встроенный виджет Telegram по клику
+    var trigger = document.getElementById('telegram-login-trigger');
+    var holder = document.getElementById('telegram-widget-holder');
+    if (trigger && holder) {
+        trigger.addEventListener('click', function (e) {
+            e.preventDefault();
+            holder.style.display = 'block';
+            trigger.style.display = 'none';
+        });
+    } else if (trigger) {
+        trigger.addEventListener('click', function (e) {
+            e.preventDefault();
+            alert('Вход через Telegram недоступен: бот не настроен в .env (TELEGRAM_BOT_TOKEN / TELEGRAM_BOT_USERNAME).');
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Выход — TripMate{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5 text-center">
+        <h1 class="h3 mb-4">Выйти из аккаунта?</h1>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Выйти</button>
+            <a href="{% url 'core:home' %}" class="btn btn-outline-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Личный кабинет — TripMate{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Личный кабинет</h1>
+    <div>
+        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary me-2">Редактировать профиль</a>
+        <a href="{% url 'trips:trip_create' %}" class="btn btn-primary">Создать поездку</a>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#my-trips">Мои поездки ({{ my_trips.count }})</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#my-apps">Мои заявки ({{ my_applications.count }})</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#incoming-apps">Заявки на мои поездки ({{ applications_for_my_trips.count }})</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#recs">Рекомендации</button></li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="my-trips">
+        <div class="row g-3">
+            {% for trip in my_trips %}
+                {% include 'trips/trip_card.html' %}
+            {% empty %}
+                <p class="text-muted">Вы ещё не создали ни одной поездки.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="my-apps">
+        <div class="list-group">
+            {% for app in my_applications %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'trips:trip_detail' pk=app.trip.pk %}">{{ app.trip.title }}</a>
+                        <span class="badge text-bg-{% if app.status == 'accepted' %}success{% elif app.status == 'rejected' %}danger{% elif app.status == 'cancelled' %}secondary{% else %}warning{% endif %} ms-1">{{ app.get_status_display }}</span>
+                    </div>
+                    {% if app.status == 'pending' %}
+                    <form method="post" action="{% url 'applications:application_cancel' pk=app.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'accounts:dashboard' %}">
+                        <button class="btn btn-sm btn-outline-secondary">Отменить</button>
+                    </form>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p class="text-muted">Вы пока не подавали заявок.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="incoming-apps">
+        <div class="list-group">
+            {% for app in applications_for_my_trips %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'accounts:profile_detail' pk=app.user.pk %}">{{ app.user.username }}</a>
+                        → <a href="{% url 'trips:trip_detail' pk=app.trip.pk %}">{{ app.trip.title }}</a>
+                        <span class="badge text-bg-{% if app.status == 'accepted' %}success{% elif app.status == 'rejected' %}danger{% elif app.status == 'cancelled' %}secondary{% else %}warning{% endif %} ms-1">{{ app.get_status_display }}</span>
+                    </div>
+                    {% if app.status == 'pending' %}
+                    <div class="d-flex gap-1">
+                        <form method="post" action="{% url 'applications:application_accept' pk=app.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-success">Принять</button>
+                        </form>
+                        <form method="post" action="{% url 'applications:application_reject' pk=app.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger">Отклонить</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p class="text-muted">Заявок на ваши поездки пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="recs">
+        <div class="row g-3">
+            {% for rec in recommendations %}
+                {% include 'trips/trip_card.html' with trip=rec.trip %}
+            {% empty %}
+                <p class="text-muted">Пока нет рекомендаций — заполните профиль и интересы.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

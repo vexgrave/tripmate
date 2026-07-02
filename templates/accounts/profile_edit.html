@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Редактирование профиля — TripMate{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h1 class="mb-4">Редактирование профиля</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">{{ form.avatar.label }}</label>
+                {{ form.avatar }}
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.city.label }}</label>
+                    {{ form.city }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.age.label }}</label>
+                    {{ form.age }}
+                </div>
+            </div>
+            <div class="mb-3 mt-3">
+                <label class="form-label">{{ form.bio.label }}</label>
+                {{ form.bio }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Интересы</label>
+                <div class="row row-cols-2 row-cols-md-3">
+                    {% for checkbox in form.interests %}
+                        <div class="form-check col">{{ checkbox.tag }} <label class="form-check-label">{{ checkbox.choice_label }}</label></div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <h6 class="mt-4">Социальные сети <span class="text-muted small">(необязательно, только ссылки)</span></h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-telegram"></i> {{ form.telegram_url.label }}</label>
+                    {{ form.telegram_url }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-person-video2"></i> {{ form.vk_url.label }}</label>
+                    {{ form.vk_url }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-instagram"></i> {{ form.instagram_url.label }}</label>
+                    {{ form.instagram_url }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-youtube"></i> {{ form.youtube_url.label }}</label>
+                    {{ form.youtube_url }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">{{ form.other_url.label }}</label>
+                    {{ form.other_url }}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">Сохранить</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
